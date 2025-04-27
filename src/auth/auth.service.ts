@@ -100,7 +100,7 @@ export class AuthService {
     return this.loginUser(newUser); // accessToken과 refreshToken 반환
   }
 
-  async extreactTokenFromHeader(header: string, isBearer: boolean) {
+  extreactTokenFromHeader(header: string, isBearer: boolean) {
     const splitToken = header.split(' '); // ['Bearer', 'token']
     const prefix = isBearer ? 'Bearer' : 'Basic';
 
@@ -122,7 +122,7 @@ export class AuthService {
     return { email: split[0], password: split[1] };
   }
 
-  // 토큰 검증
+  // 토큰 검증(payload 반환)
   verifyToken(token: string) {
     return this.jwtService.verify(token, {
       secret: JWT_SECRET,

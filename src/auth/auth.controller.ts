@@ -1,15 +1,21 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { MaxLengthPipe, MinLengthPipe } from './pipe/password.pipe';
+import { BasicTokenGuard } from './guard/basic-token.guard';
+import {
+  AccessTokenGuard,
+  RefreshTokenGuard,
+} from './guard/bearer-token.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('token/access')
   // access token 발급
-  async postTokenAccess(@Headers('Authorization') rawToken: string) {
-    const token = await this.authService.extreactTokenFromHeader(
+  @Post('token/access')
+  @UseGuards(AccessTokenGuard)
+  postTokenAccess(@Headers('Authorization') rawToken: string) {
+    const token = this.authService.extreactTokenFromHeader(
       rawToken,
       false, // basic 토큰이므로
     );
@@ -21,10 +27,11 @@ export class AuthController {
     };
   }
 
-  @Post('token/refresh')
   // refresh token 발급
-  async postTokenRefresh(@Headers('Authorization') rawToken: string) {
-    const token = await this.authService.extreactTokenFromHeader(
+  @Post('token/refresh')
+  @UseGuards(RefreshTokenGuard)
+  postTokenRefresh(@Headers('Authorization') rawToken: string) {
+    const token = this.authService.extreactTokenFromHeader(
       rawToken,
       true, // bearer 토큰이므로
     );
@@ -37,15 +44,13 @@ export class AuthController {
   }
 
   @Post('login/email')
+  @UseGuards(BasicTokenGuard) // 로그인할 때 가드 사용
   async postLoginEmail(
     // header에서 토큰을 받는 형식으로 변경
     @Headers('Authorization') rawToken: string,
   ) {
-    const token = await this.authService.extreactTokenFromHeader(
-      rawToken,
-      false,
-    ); // base64 형태의 토큰 추출
-    const credentials = await this.authService.decodedBasicToken(token); // base64 형태의 토큰을 디코딩
+    const token = this.authService.extreactTokenFromHeader(rawToken, false); // base64 형태의 토큰 추출
+    const credentials = this.authService.decodedBasicToken(token); // base64 형태의 토큰을 디코딩
     return this.authService.loginWithEmail(credentials);
   }
 
