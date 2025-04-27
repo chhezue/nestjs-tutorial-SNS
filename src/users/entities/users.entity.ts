@@ -1,12 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { ROLES } from '../const/roles.const.enum';
 import { PostsModel } from 'src/posts/entities/posts.entity';
+import { BaseModel } from '../../common/entity/base.entity';
 
 @Entity()
-export class UsersModel {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class UsersModel extends BaseModel {
   @Column({ unique: true, length: 20 })
   nickname: string;
 
