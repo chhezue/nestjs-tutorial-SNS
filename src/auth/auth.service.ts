@@ -124,9 +124,13 @@ export class AuthService {
 
   // 토큰 검증(payload 반환)
   verifyToken(token: string) {
-    return this.jwtService.verify(token, {
-      secret: JWT_SECRET,
-    });
+    try {
+      return this.jwtService.verify(token, {
+        secret: JWT_SECRET,
+      });
+    } catch (e) {
+      throw new UnauthorizedException('만료된 토큰이거나 잘못된 토큰입니다.');
+    }
   }
 
   // 토큰 갱신
