@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { PostsModel } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PaginatePostDto } from './dto/paginate-post.dto';
+import { CommonService } from '../common/common.service';
 
 @Injectable()
 export class PostsService {
@@ -10,12 +12,16 @@ export class PostsService {
     // 모델을 만들 때, 모델에 해당되는 리포지토리를 주입하고 싶을 때 작성
     @InjectRepository(PostsModel)
     private readonly postsRepository: Repository<PostsModel>,
+    private readonly commonService: CommonService,
   ) {}
 
-  async getAllPosts() {
-    return await this.postsRepository.find({
-      relations: ['author'], // authorId와 매핑되는 author 정보 전체를 가져옴.
-    });
+  async paginatePosts(dto: PaginatePostDto) {
+    return this.commonService.paginate(
+      dto,
+      this.postsRepository,
+      { relations: ['author'] },
+      'posts',
+    );
   }
 
   async getPostById(id: number) {
@@ -27,7 +33,6 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException();
     }
-
     return post;
   }
 
@@ -42,9 +47,7 @@ export class PostsService {
       commentCount: 0,
     });
 
-    const newPost = await this.postsRepository.save(post);
-
-    return newPost;
+    return await this.postsRepository.save(post);
   }
 
   async updatePost(postId: number, title?: string, content?: string) {
@@ -71,9 +74,7 @@ export class PostsService {
       post.content = content;
     }
 
-    const newPost = await this.postsRepository.save(post);
-
-    return newPost;
+    return await this.postsRepository.save(post);
   }
 
   async deletePost(postId: number) {
@@ -86,9 +87,14 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException();
     }
-
     await this.postsRepository.delete(postId);
 
     return postId;
+  }
+
+  async generatePosts(userId: number) {
+    for (let i = 0; i < 100; i++) {
+      await this.createPost(userId, `random ${i}`, `random ${i}`);
+    }
   }
 }

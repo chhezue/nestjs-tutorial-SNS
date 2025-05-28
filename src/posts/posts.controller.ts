@@ -8,10 +8,13 @@ import {
   Delete,
   ParseIntPipe,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { AccessTokenGuard } from '../auth/guard/bearer-token.guard';
 import { User } from '../users/decorator/user.decorator';
+import { PaginatePostDto } from './dto/paginate-post.dto';
+import { UsersModel } from '../users/entities/users.entity';
 
 @Controller('posts')
 export class PostsController {
@@ -19,8 +22,8 @@ export class PostsController {
 
   // GET /posts
   @Get()
-  getPosts() {
-    return this.postsService.getAllPosts();
+  getPosts(@Query() query: PaginatePostDto) {
+    return this.postsService.paginatePosts(query);
   }
 
   // GET /posts/:id
@@ -29,9 +32,20 @@ export class PostsController {
     return this.postsService.getPostById(id);
   }
 
+  @Post('random')
+  // @UseGuards(AccessTokenGuard)
+  // async postPostsRandom(@User() user: UsersModel) {
+  //   await this.postsService.generatePosts(user.id);
+  //   return true;
+  // }
+  async postPostsRandom() {
+    await this.postsService.generatePosts(1);
+    return true;
+  }
+
   // POST /posts
   @Post()
-  @UseGuards(AccessTokenGuard)
+  // @UseGuards(AccessTokenGuard)
   postPosts(
     // @User('id')가 호출되면, user 객체에서 id 속성을 가져옵니다. 즉, req.user.id를 userId에 전달합니다.
     // @User()처럼 data를 주지 않으면, user 객체 전체가 반환됩니다. 이 경우 req.user를 그대로 user 파라미터로 전달받을 수 있습니다.
