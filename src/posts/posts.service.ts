@@ -36,7 +36,12 @@ export class PostsService {
     return post;
   }
 
-  async createPost(authorId: number, title: string, content: string) {
+  async createPost(
+    authorId: number,
+    title: string,
+    content: string,
+    image?: string,
+  ) {
     const post = this.postsRepository.create({
       author: {
         id: authorId,
@@ -45,6 +50,7 @@ export class PostsService {
       content: content,
       likeCount: 0,
       commentCount: 0,
+      image,
     });
 
     return await this.postsRepository.save(post);

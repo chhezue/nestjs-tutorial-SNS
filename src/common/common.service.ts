@@ -8,10 +8,12 @@ import {
   Repository,
 } from 'typeorm';
 import { FILTER_MAPPER } from './const/filter-mapper.const';
-import { HOST, PROTOCOL } from './const/env.const';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class CommonService {
+  constructor(private readonly configService: ConfigService) {}
+
   paginate<T extends BaseModel>(
     dto: BasePaginationDto,
     repository: Repository<T>,
@@ -54,13 +56,16 @@ export class CommonService {
       ...overrideFindOptions,
     });
 
+    const protocol = this.configService.get<string>('PROTOCOL');
+    const host = this.configService.get<string>('HOST');
+
     // [posts 메타데이터 생성]
     // 해당되는 포스트가 0개 이상이면 마지막 포스트를 가져오고, 아니라면 null을 반환
     const lastItem =
       results.length > 0 && results.length === dto.take
         ? results[results.length - 1]
         : null; // 현재 페이지네이션의 마지막 포스트
-    const nextUrl = lastItem && new URL(`${PROTOCOL}://${HOST}/${path}`);
+    const nextUrl = lastItem && new URL(`${protocol}://${host}/${path}`);
 
     if (nextUrl) {
       // dto의 키 값들을 루핑하면서 키값에 해당되는 밸류가 존재하면 파라미터에 그대로 붙여넣음.
