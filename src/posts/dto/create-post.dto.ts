@@ -3,7 +3,9 @@ import { PostsModel } from '../entities/posts.entity';
 import { IsOptional, IsString } from 'class-validator';
 
 export class CreatePostDto extends PickType(PostsModel, ['title', 'content']) {
-  @IsString()
+  @IsString({
+    each: true, // image 배열에 있는 모든 값을 string으로 검증
+  })
   @IsOptional()
-  images?: string;
+  images?: string[];
 }

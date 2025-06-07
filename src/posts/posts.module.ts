@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ImageModel } from '../common/entity/image.entity';
+import { PostsImagesService } from './image/images.service';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,12 +11,12 @@ import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PostsModel]),
+    TypeOrmModule.forFeature([PostsModel, ImageModel]),
     CommonModule,
     AuthModule,
     UsersModule,
   ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, PostsImagesService],
 })
 export class PostsModule {}
