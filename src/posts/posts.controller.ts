@@ -11,7 +11,6 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { async } from 'rxjs';
 import { DataSource, QueryRunner as QR } from 'typeorm';
 import { QueryRunner } from '../common/decorator/query-runner.decorator';
 import { ImageModelType } from '../common/entity/image.entity';
@@ -61,7 +60,7 @@ export class PostsController {
     // @User()처럼 data를 주지 않으면, user 객체 전체가 반환됩니다. 이 경우 req.user를 그대로 user 파라미터로 전달받을 수 있습니다.
     @User('id') userId: number, // User Decorator에서 반환된 data의 id 값을 가져옴.
     @Body() body: CreatePostDto,
-    @QueryRunner(): qr: QR,
+    @QueryRunner() qr: QR, // 실제 쿼리 러너 타입
   ) {
     // post 먼저 생성
     const post = await this.postsService.createPost(userId, body, qr);

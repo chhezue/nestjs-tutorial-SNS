@@ -1,14 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { join, basename } from 'path';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { QueryRunner, Repository } from 'typeorm';
-import {
-  POSTS_IMAGE_PATH,
-  PUBLIC_FOLDER_PATH,
-} from '../common/const/path.const';
 import { ImageModel } from '../common/entity/image.entity';
 import { DEFAULT_POST_FIND_OPTIONS } from './const/default-post-find-options.const';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -16,8 +7,6 @@ import { PostsModel } from './entities/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { CommonService } from '../common/common.service';
-import { promises } from 'fs';
-import { CreateImageDto } from './image/dto/create-image.dto';
 
 @Injectable()
 export class PostsService {
@@ -41,7 +30,9 @@ export class PostsService {
   }
 
   async getPostById(id: number, qr?: QueryRunner) {
-    const post = await this.postsRepository.findOne({
+    const repository = this.getRepository(qr);
+
+    const post = await repository.findOne({
       where: { id: id },
       ...DEFAULT_POST_FIND_OPTIONS,
     });
