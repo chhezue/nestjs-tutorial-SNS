@@ -1,4 +1,4 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { UseFilters } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,6 +9,10 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { AuthService } from '../auth/auth.service';
+import { SocketCatchHttpExceptionFilter } from '../common/exception-filter/socket-catch-http.exception-filter';
+import { UsersModel } from '../users/entities/users.entity';
+import { UsersService } from '../users/users.service';
 import { ChatsService } from './chats.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { EnterChatDto } from './dto/enter-chat.dto';
@@ -22,16 +26,49 @@ export class ChatsGateway implements OnGatewayConnection {
   constructor(
     private readonly chatsService: ChatsService,
     private readonly messagesService: MessagesService,
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
   ) {}
 
   @WebSocketServer()
   server: Server; // 서버 객체(IO 생성)
 
-  handleConnection(socket: Socket): any {
+  afterInit(server: any) {
+    console.log(`After gateway init: ${server}`);
+  }
+
+  handleDisconnect(socket: Socket) {
+    console.log(`on disconnect called: ${socket.id}`);
+  }
+
+  async handleConnection(socket: Socket & { user: UsersModel }) {
     console.log(`on connect called: ${socket.id}`);
+
+    const headers = socket.handshake.headers;
+    const rawToken = headers['authorization'];
+
+    if (!rawToken) {
+      socket.disconnect();
+    }
+
+    try {
+      const token = this.authService.extreactTokenFromHeader(rawToken, true);
+      const payload = this.authService.verifyToken(token);
+      const user = await this.usersService.getUserByEmail(payload.email);
+
+      if (!user) {
+        socket.disconnect();
+      } else {
+        socket.user = user; // = request.user = user;
+        return true;
+      }
+    } catch (err) {
+      socket.disconnect();
+    }
   }
 
   // join(): room에 들어간다는 의미
+  @UseFilters(SocketCatchHttpExceptionFilter) // http 에러 발생 시 알맞은 형식으로 변경해줌.
   @SubscribeMessage('enter_chat')
   async enterChat(
     @MessageBody() data: EnterChatDto,
@@ -53,17 +90,23 @@ export class ChatsGateway implements OnGatewayConnection {
 
   // on(subscribe): 메세지를 받는다는 의미
   // socket.on('send_message', (message) => {console.log(message)});
+  @UseFilters(SocketCatchHttpExceptionFilter) // http 에러 발생 시 알맞은 형식으로 변경해줌.
   @SubscribeMessage('send_message')
   async sendMessage(
     @MessageBody() dto: CreateMessagesDto,
-    @ConnectedSocket() socket: Socket,
+    // socket이라는 변수에 user라는 정보가 붙어 있다고 타입스크립트에게 알려 주는 문법
+    // 원래 socket에는 user라는 속성이 없지만 authGuard에서 커스텀으로 정의 -> 사용하기 위해서 해당 문법 사용
+    @ConnectedSocket() socket: Socket & { user: UsersModel },
   ) {
     const chatExists = await this.chatsService.checkIfChatExists(dto.chatId);
     if (!chatExists) {
       throw new WsException(`존재하지 않는 채팅방입니다: ${dto.chatId}`);
     }
 
-    const message = await this.messagesService.createMessage(dto); // 보낼 메세지 만들기
+    const message = await this.messagesService.createMessage(
+      dto,
+      socket.user.id,
+    ); // 보낼 메세지 만들기
     if (!message) {
       throw new WsException(`존재하지 않는 메세지입니다: ${message}`);
     }
@@ -83,16 +126,7 @@ export class ChatsGateway implements OnGatewayConnection {
   }
 
   // 채팅방을 만드는 기능
-  @UsePipes(
-    new ValidationPipe({
-      transform: true, // dto의 default 값들만으로도 인스턴스 생성 가능하도록 허용
-      transformOptions: {
-        enableImplicitConversion: true, // Type(() => Number) 사용하지 않아도 됨.
-      },
-      whitelist: true, // dto에 정의된 필드만 허용
-      forbidNonWhitelisted: true, // dto에 정의된 필드만 허용하지 않으면 http 에러 발생
-    }),
-  )
+  @UseFilters(SocketCatchHttpExceptionFilter) // http 에러 발생 시 알맞은 형식으로 변경해줌.
   @SubscribeMessage('create_chat')
   async createChat(
     @MessageBody() data: CreateChatDto,

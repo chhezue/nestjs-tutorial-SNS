@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm';
 import { ChatsModel } from '../../chats/entity/chats.entity';
 import { MessagesModel } from '../../chats/messages/entity/messages.entity';
@@ -11,6 +12,9 @@ export class UsersModel extends BaseModel {
   nickname: string;
 
   @Column({ unique: true })
+  @Exclude({
+    toPlainOnly: true, // 응답으로 보낼 때만 비밀번호 보여주지 않음.
+  })
   password: string;
 
   @Column({ unique: true })
