@@ -4,7 +4,7 @@ import { PostsImagesService } from './image/images.service';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PostsModel } from './entities/posts.entity';
+import { PostsModel } from './entity/posts.entity';
 import { CommonModule } from '../common/common.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
@@ -18,5 +18,6 @@ import { UsersModule } from '../users/users.module';
   ],
   controllers: [PostsController],
   providers: [PostsService, PostsImagesService],
+  exports: [PostsService],
 })
 export class PostsModule {}

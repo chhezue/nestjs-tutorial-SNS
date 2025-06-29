@@ -21,7 +21,7 @@ import { AccessTokenGuard } from '../auth/guard/bearer-token.guard';
 import { User } from '../users/decorator/user.decorator';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UsersModel } from '../users/entities/users.entity';
+import { UsersModel } from '../users/entity/users.entity';
 
 @Controller('posts')
 export class PostsController {

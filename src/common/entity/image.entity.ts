@@ -1,7 +1,7 @@
 import { BaseModel } from './base.entity';
 import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { PostsModel } from '../../posts/entities/posts.entity';
+import { PostsModel } from '../../posts/entity/posts.entity';
 import { join } from 'path';
 import { Transform } from 'class-transformer';
 import { POST_PUBLIC_IMAGE_PATH } from '../const/path.const';
@@ -40,5 +40,5 @@ export class ImageModel extends BaseModel {
   path: string;
 
   @ManyToOne(() => PostsModel, (post) => post.images)
-  posts?: PostsModel;
+  post?: PostsModel;
 }

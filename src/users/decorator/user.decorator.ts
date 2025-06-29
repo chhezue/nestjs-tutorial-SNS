@@ -3,7 +3,7 @@ import {
   ExecutionContext,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { UsersModel } from '../entities/users.entity';
+import { UsersModel } from '../entity/users.entity';
 
 // Guard의 Request에 들어 있는 UserModel을 반환하는 Custom Decorator
 // data: 선택적인 매개변수로, 요청된 user 객체의 특정 속성을 추출하여 반환

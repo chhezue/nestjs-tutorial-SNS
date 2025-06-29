@@ -3,7 +3,7 @@ import { QueryRunner, Repository } from 'typeorm';
 import { ImageModel } from '../common/entity/image.entity';
 import { DEFAULT_POST_FIND_OPTIONS } from './const/default-post-find-options.const';
 import { CreatePostDto } from './dto/create-post.dto';
-import { PostsModel } from './entities/posts.entity';
+import { PostsModel } from './entity/posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginatePostDto } from './dto/paginate-post.dto';
 import { CommonService } from '../common/common.service';
@@ -115,5 +115,11 @@ export class PostsService {
         images: [],
       });
     }
+  }
+
+  checkPostExistsById(id: number) {
+    return this.postsRepository.exists({
+      where: { id },
+    });
   }
 }
