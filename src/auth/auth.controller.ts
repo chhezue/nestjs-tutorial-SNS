@@ -1,4 +1,5 @@
 import { Body, Controller, Headers, Post, UseGuards } from '@nestjs/common';
+import { IsPublic } from '../common/decorator/is-public.decorator';
 import { AuthService } from './auth.service';
 import { MaxLengthPipe, MinLengthPipe } from './pipe/password.pipe';
 import { BasicTokenGuard } from './guard/basic-token.guard';
@@ -13,6 +14,7 @@ export class AuthController {
 
   // access token 발급
   @Post('token/access')
+  @IsPublic()
   @UseGuards(AccessTokenGuard)
   postTokenAccess(@Headers('Authorization') rawToken: string) {
     const token = this.authService.extreactTokenFromHeader(
@@ -29,6 +31,7 @@ export class AuthController {
 
   // refresh token 발급
   @Post('token/refresh')
+  @IsPublic()
   @UseGuards(RefreshTokenGuard)
   postTokenRefresh(@Headers('Authorization') rawToken: string) {
     const token = this.authService.extreactTokenFromHeader(
@@ -44,6 +47,7 @@ export class AuthController {
   }
 
   @Post('login/email')
+  @IsPublic()
   @UseGuards(BasicTokenGuard) // 로그인할 때 가드 사용
   async postLoginEmail(
     // header에서 토큰을 받는 형식으로 변경
@@ -55,6 +59,7 @@ export class AuthController {
   }
 
   @Post('register/email')
+  @IsPublic()
   postRegisterEmail(
     @Body('nickname') nickname: string,
     @Body('email') email: string,

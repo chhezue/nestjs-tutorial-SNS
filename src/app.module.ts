@@ -4,13 +4,16 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AccessTokenGuard } from './auth/guard/bearer-token.guard';
 import { ChatsModel } from './chats/entity/chats.entity';
 import { MessagesModel } from './chats/messages/entity/messages.entity';
 import { CommentsModel } from './posts/comments/entity/comments.entity';
 import { PostsModule } from './posts/posts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RolesGuard } from './users/guard/roles.guard';
 import { UsersModule } from './users/users.module';
 import { UsersModel } from './users/entity/users.entity';
 import { PostsModel } from './posts/entity/posts.entity';
@@ -64,7 +67,12 @@ import { CommentsModule } from './posts/comments/comments.module';
     CommentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // 글로벌 가드 적용
+    { provide: APP_GUARD, useClass: AccessTokenGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule implements NestModule {
   // 전체 경로의 모든 메소드에 LogMiddleware 적용
