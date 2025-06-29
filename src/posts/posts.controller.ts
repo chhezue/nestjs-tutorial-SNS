@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Query,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { DataSource, QueryRunner as QR } from 'typeorm';
 import { IsPublic } from '../common/decorator/is-public.decorator';
@@ -17,6 +18,7 @@ import { ImageModelType } from '../common/entity/image.entity';
 import { TransactionInterceptor } from '../common/interceptor/transaction.interceptor';
 import { Roles } from '../users/decorator/roles.decorator';
 import { ROLES } from '../users/const/roles.const.enum';
+import { IsPostMintedOrAdminGuard } from './guard/is-post-mind-or-admin.guard';
 import { PostsImagesService } from './image/images.service';
 import { PostsService } from './posts.service';
 import { User } from '../users/decorator/user.decorator';
@@ -88,14 +90,15 @@ export class PostsController {
   }
 
   // PATCH /posts/:id
-  @Patch(':id')
+  @Patch(':postId')
+  @UseGuards(IsPostMintedOrAdminGuard)
   patchPost(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('postId', ParseIntPipe) postId: number, // 가드에 적용되는 req.postId
     // ? 연산자를 사용하여 null일 수도 있음을 명시
     @Body('title') title?: string,
     @Body('content') content?: string,
   ) {
-    return this.postsService.updatePost(id, title, content);
+    return this.postsService.updatePost(postId, title, content);
   }
 
   // Delete /posts/:id

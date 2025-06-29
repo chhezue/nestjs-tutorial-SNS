@@ -117,9 +117,23 @@ export class PostsService {
     }
   }
 
-  checkPostExistsById(id: number) {
-    return this.postsRepository.exists({
+  async checkPostExistsById(id: number) {
+    return await this.postsRepository.exists({
       where: { id },
+    });
+  }
+
+  async isPostMine(userId: number, postId: number) {
+    return await this.postsRepository.exists({
+      where: {
+        id: postId,
+        author: {
+          id: userId,
+        },
+      },
+      relations: {
+        author: true, // where 쿼리로 찾은 author 정보도 가져옴.
+      },
     });
   }
 }

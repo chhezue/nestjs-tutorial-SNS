@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { IsPublic } from '../../common/decorator/is-public.decorator';
 import { User } from '../../users/decorator/user.decorator';
@@ -16,6 +17,7 @@ import { CommentsService } from './comments.service';
 import { CreateCommentsDto } from './dto/create-comments.dto';
 import { PaginateCommentsDto } from './dto/paginate-comments.dto';
 import { UpdateCommentsDto } from './dto/update-comments.dto';
+import { IsCommentMintedOrAdminGuard } from './guard/is-comment-mind-or-admin.guard';
 
 @Controller('posts/:postId/comments')
 export class CommentsController {
@@ -46,6 +48,7 @@ export class CommentsController {
   }
 
   @Patch(':commentId')
+  @UseGuards(IsCommentMintedOrAdminGuard)
   patchComment(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() body: UpdateCommentsDto,

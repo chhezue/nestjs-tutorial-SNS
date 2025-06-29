@@ -89,4 +89,18 @@ export class CommentsService {
     await this.commentsRepository.delete({ id: commentId });
     return commentId;
   }
+
+  async isCommentMine(userId: number, commentId: number) {
+    return await this.commentsRepository.exists({
+      where: {
+        id: commentId,
+        author: {
+          id: userId,
+        },
+      },
+      relations: {
+        author: true, // where 쿼리로 찾은 author 정보도 가져옴.
+      },
+    });
+  }
 }
